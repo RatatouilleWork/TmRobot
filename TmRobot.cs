@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Text;
-using System.Net;
-using System.Net.Sockets;
-using System.Collections.Generic;
-using NModbus;
 
-namespace TmRobotFunctionTest
+namespace TmRobotArm
 {
     public class TmRobot
     {
@@ -20,7 +15,7 @@ namespace TmRobotFunctionTest
             Console.WriteLine("2. Tcp/Ip: ServerIP = 192.168.1.120, Port = 5980");
             Console.WriteLine("Achtung: ports are fixed, please do not change!");
 
-            driver= new TmRobotDriver();
+            driver = new TmRobotDriver();
 
             driver.CreateMaster();
             driver.InitListenNodeSocketConnection();
@@ -36,15 +31,15 @@ namespace TmRobotFunctionTest
         /// <returns> 格式错误返回-1， 正确执行返回0 </returns>
         public int PtpMoveTo(float[] coordinates, ushort speed = 50)
         {
-            if(coordinates.Length != 3)
+            if (coordinates.Length != 3)
             {
                 Console.WriteLine("Wrong Coordinates!");
                 return -1;
 
             }
-            float[] temp = new float[6] {0.0F, 0.0F, 0.0F, -90.0F, -90.0F, 0.0F};
+            float[] temp = new float[6] { 0.0F, 0.0F, 0.0F, -90.0F, -90.0F, 0.0F };
 
-            for (int i = 0; i< coordinates.Length; i++)
+            for (int i = 0; i < coordinates.Length; i++)
             {
                 temp[i] = coordinates[i];
             }
@@ -59,13 +54,13 @@ namespace TmRobotFunctionTest
         /// <returns> 格式错误返回-1， 正确执行返回0 </returns>
         public int LineMoveTo(float[] coordinates, ushort speed = 50)
         {
-            if(coordinates.Length != 3)
+            if (coordinates.Length != 3)
             {
                 Console.WriteLine("Wrong Coordinates!");
                 return -1;
             }
-            float[] temp = new float[6] {0.0F, 0.0F, 0.0F, -90.0F, -90.0F, 0.0F};
-            for (int i = 0; i< coordinates.Length; i++)
+            float[] temp = new float[6] { 0.0F, 0.0F, 0.0F, -90.0F, -90.0F, 0.0F };
+            for (int i = 0; i < coordinates.Length; i++)
             {
                 temp[i] = coordinates[i];
             }
@@ -93,40 +88,51 @@ namespace TmRobotFunctionTest
         }
 
         #region Single Public Joint Movement
+        /// <summary>
+        /// 旋转第x轴
+        /// </summary>
+        /// <param name="jointNumb">轴编号1~6</param>
+        /// <param name="angle">角度</param>
+        /// <param name="speed">速度(百分比)</param>
+        public void RotateJX(int jointNumb, float angle, ushort speed = 50)
+        {
+            if (jointNumb < 1 || jointNumb > 6)
+            {
+                Console.WriteLine("There is no joint-" + jointNumb);
+                return;
+            }
+            float[] temp = new float[6] { 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F };
+            temp[jointNumb - 1] = angle;
+            driver.MoveJointRelated(speed, temp);
+        }
         public void RotateJ1(float angle, ushort speed = 50)
         {
-            float[] temp= new float[6] { angle, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F };
-            driver.MoveJointRelated(speed, temp);
+            RotateJX(1, angle, speed);
         }
         public void RotateJ2(float angle, ushort speed = 50)
         {
-            float[] temp= new float[6] { 0.0F, angle, 0.0F, 0.0F, 0.0F, 0.0F };
-            driver.MoveJointRelated(speed, temp);
+            RotateJX(2, angle, speed);
         }
         public void RotateJ3(float angle, ushort speed = 50)
         {
-            float[] temp= new float[6] { 0.0F, 0.0F, angle, 0.0F, 0.0F, 0.0F };
-            driver.MoveJointRelated(speed, temp);
+            RotateJX(3, angle, speed);
         }
         public void RotateJ4(float angle, ushort speed = 50)
         {
-            float[] temp= new float[6] { 0.0F, 0.0F, 0.0F, angle, 0.0F, 0.0F };
-            driver.MoveJointRelated(speed, temp);
+            RotateJX(4, angle, speed);
         }
         public void RotateJ5(float angle, ushort speed = 50)
         {
-            float[] temp= new float[6] { 0.0F, 0.0F, 0.0F, 0.0F, angle, 0.0F };
-            driver.MoveJointRelated(speed, temp);
+            RotateJX(5, angle, speed);
         }
         public void RotateJ6(float angle, ushort speed = 50)
         {
-            float[] temp= new float[6] { 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, angle };
-            driver.MoveJointRelated(speed, temp);
+            RotateJX(6, angle, speed);
         }
 
         #endregion
 
-        #region Public Bit Function
+        #region Public 放线设备
         public void TurnOnLayout()
         {
             driver.SetArmDqValue(0, 1);
@@ -135,10 +141,12 @@ namespace TmRobotFunctionTest
         {
             driver.SetArmDqValue(0, 0);
         }
-
         #endregion
 
-
+        public bool IsError()
+        {
+            return driver.IsError();
+        }
     }
 
 }

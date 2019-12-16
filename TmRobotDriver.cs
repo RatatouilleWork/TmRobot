@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using NModbus;
 
-namespace TmRobotFunctionTest
+namespace TmRobotArm
 {
     /// <summary>
     /// Drivers of TM Robot
@@ -14,9 +14,9 @@ namespace TmRobotFunctionTest
     public class TmRobotDriver
     {
         #region[Properties Declarations and Definations]
-        private const string hostIpAddr = "127.0.0.1";
+        private const string hostIpAddr = "192.168.1.120";
         private const ushort modbusPort = 502;
-        private const ushort tcpPort = 5980;
+        private const ushort tcpPort = 5890;
         private Socket sock;
         private IModbusMaster master;
         #endregion
@@ -158,6 +158,12 @@ namespace TmRobotFunctionTest
             return b[bit]? 1:0;
         }
 
+        public bool IsError()
+        {
+            ushort[] temp = master.ReadInputRegisters(0, 7201, 1);
+            return temp[0] == 1 ? true : false;
+        }
+
         #endregion
 
         #region[Modbus Reg Functions: Reg-read operations]
@@ -282,7 +288,7 @@ namespace TmRobotFunctionTest
             }
             else if("PTP" == type)
             {
-                data = ",1,PTP(\"CPP\","
+                data = "1,PTP(\"CPP\","
                     + coordinates[0].ToString() + ","
                     + coordinates[1].ToString() + ","
                     + coordinates[2].ToString() + ","
@@ -290,11 +296,11 @@ namespace TmRobotFunctionTest
                     + coordinates[4].ToString() + ","
                     + coordinates[5].ToString() + ","
                     + speed.ToString() + ","
-                    + "1,0,false)\r\n";
+                    + "1,0,false)";
             }
             else if("Line" == type)
             {
-                data = ",1,Line(\"CAP\","
+                data = "1,Line(\"CAP\","
                     + coordinates[0].ToString() + "," 
                     + coordinates[1].ToString() + ","
                     + coordinates[2].ToString() + ","
@@ -305,7 +311,7 @@ namespace TmRobotFunctionTest
                     + "1,0,false)";
             }
 
-            String crcBody = head + "," + data.Length.ToString() + data + ",";
+            String crcBody = head + "," + data.Length.ToString() + "," + data + ",";
             crc = CommonTools.CRC(Encoding.Default.GetBytes(crcBody));
 
             String cmd = "$" + crcBody + "*" + crc + "\r\n";
@@ -336,7 +342,7 @@ namespace TmRobotFunctionTest
             String data= null;
             String crc = null;
 
-            data = ",1,Move_PTP(\"JPP\","
+            data = "1,Move_PTP(\"JPP\","
                 + coordinates[0].ToString() + ","
                 + coordinates[1].ToString() + ","
                 + coordinates[2].ToString() + ","
@@ -346,7 +352,7 @@ namespace TmRobotFunctionTest
                 + speed.ToString() + ","
                 + "1,0,false)";
 
-            String crcBody = head + "," + data.Length.ToString() + data + ",";
+            String crcBody = head + "," + data.Length.ToString() + "," + data + ",";
             crc = CommonTools.CRC(Encoding.Default.GetBytes(crcBody));
 
             String cmd = "$" + crcBody + "*" + crc + "\r\n";

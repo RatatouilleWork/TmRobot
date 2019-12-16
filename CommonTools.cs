@@ -2,29 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TmRobotFunctionTest
+namespace TmRobotArm
 {
     public static class CommonTools
     {
-        public static float ToFloat(byte[] data)
-        {
-            unsafe
-            {
-                float f = 0.0F;
-                byte i;
-                byte[] x = data;
-                void* pf;
-                fixed (byte* px = x)
-                {
-                    pf = &f;
-                    for (i = 0; i < data.Length; i++)
-                    {
-                        *((byte*)pf + i) = *(px + i);
-                    }
-                }
-                return f;
-            }
-        }
         public static float GetFloatValue(ushort data)
         {
             byte[] temp = new byte[4] { 0, 0, 0, 0 };
@@ -39,8 +20,9 @@ namespace TmRobotFunctionTest
 
             Array.Reverse(temp);
 
-            return ToFloat(temp);
+            return BitConverter.ToSingle(temp, 0);
         }
+
         public static String CRC(byte[] hex)
         {
             int temp = 0;
